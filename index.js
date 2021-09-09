@@ -1,10 +1,10 @@
 const { Message } = require("discord.js");
-const Discord = require("discord.js");
-const TOKEN = process.env.DISCORD_TOKEN;
+
 const util = require("util"),
 fs = require("fs"),
 readdir = util.promisify(fs.readdir),
 mongoose = require("mongoose");
+Discord = require("discord.js");
 
 // Load ManageInvite class
 const ManageInvite = require("./structures/Client"),
@@ -14,7 +14,9 @@ client = new ManageInvite();
 
 
 const init = async () => {
-
+  let a = await client.db.get('giveaways')
+         if (a === null) await client.db.set('giveaways', []);
+        
     // Search for all commands
     let directories = await readdir("./commands/");
     directories.forEach(async (dir) => {
@@ -35,8 +37,16 @@ const init = async () => {
         client.on(eventName, (...args) => event.run(...args));
         delete require.cache[require.resolve(`./events/${file}`)];
     });
-     
-    client.login(TOKEN); // Log in to the discord api
+     const GFiles = await readdir("./giveaways-events/");
+    console.log(`Loading a total of ${GFiles.length} events.`);
+    GFiles.forEach((file) => {
+        const eventName = file.split(".")[0];
+        console.log(`Loading giveaways Event: ${eventName}`);
+        const event = require(`./giveaways-events/${file}`);
+        client.giveawaysManager.on(eventName, (...args) => event.execute(...args, client));
+        delete require.cache[require.resolve(`./giveaways-events/${file}`)];
+    });
+    client.login(client.config.token); // Log in to the discord api
 
     // connect to mongoose database
     mongoose.connect(client.config.mongodb, { useNewUrlParser: true, useUnifiedTopology: true }).catch((err) => {
@@ -75,26 +85,24 @@ const init = async () => {
          poststats();
 
         }
-        const shardlog = new Discord.WebhookClient('877174106280308746', 'vDHlmfaGd1d5kSyed-_8lfng9V0XAGtLDcmtpg8Wmr0MuwQOJi-5JGVfC0qkzCmTxXgv');
-        const gay1 = `<:CH_IconPollTickYes:875009456184897566>
- | Shard #${shardID} is ready!`;
+        const shardlog = new Discord.WebhookClient('756874584149459065', '**');
+        const gay1 = `<:online:757044247269605386> | Shard #${shardID} is ready!`;
         shardlog.send(gay1);
     });
     client.on("shardDisconnect", (shardID) => {
-        const shardlog = new Discord.WebhookClient('877174106280308746', 'vDHlmfaGd1d5kSyed-_8lfng9V0XAGtLDcmtpg8Wmr0MuwQOJi-5JGVfC0qkzCmTxXgv');
-        const gay = `<a:circle_loading:875018560336973864> | Shard #${shardID} is disconnected...`;
+        const shardlog = new Discord.WebhookClient('756874584149459065', '**');
+        const gay = `<a:loading:753232044485509268> | Shard #${shardID} is disconnected...`;
         shardlog.send(gay);
         
     });
     client.on("shardReconnecting", (shardID) => {
-        const shardlog = new Discord.WebhookClient('877174106280308746', 'vDHlmfaGd1d5kSyed-_8lfng9V0XAGtLDcmtpg8Wmr0MuwQOJi-5JGVfC0qkzCmTxXgv');
-        const gay2 = `<:CH_IconPollTickNo:875728249328660480>
- | Shard #${shardID} is reconnecting...`;
+        const shardlog = new Discord.WebhookClient('756874584149459065', '**');
+        const gay2 = `<:inactif:757044197336285252> | Shard #${shardID} is reconnecting...`;
         shardlog.send(gay2);
     });
     client.on("shardResume", (shardID) => {
-        const shardlog = new Discord.WebhookClient('877174106280308746', 'vDHlmfaGd1d5kSyed-_8lfng9V0XAGtLDcmtpg8Wmr0MuwQOJi-5JGVfC0qkzCmTxXgv');
-        const gay3 = `<a:Lc_dot:876754216184578048> | Shard #${shardID} has resumed!`;
+        const shardlog = new Discord.WebhookClient('756874584149459065', '**');
+        const gay3 = `<:online:757044247269605386> | Shard #${shardID} has resumed!`;
         shardlog.send(gay3);
     });
 };
